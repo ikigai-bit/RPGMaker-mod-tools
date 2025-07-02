@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>NPC & Player Code Replacer</title>  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+    .sidebar {
+      height: 100vh;
+      width: 200px;
+      background-color: #333;
+      padding-top: 20px;
+      color: white;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 12px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #575757;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>   <div class="sidebar">
+  <a href="Find all parameters in 401 from 0-9.html">Find all parameters in 401 from 0-9</a>
+  <a href="Find all parameters in 401 from 0-9 with Multiple Files.html">Find all parameters in 401 from 0-9 with Multiple Files</a>
+  <a href="Remove Space in a JSON.html">Remove Space in a JSON</a>
+  <a href="Replace Code Name with Name & Color Text with blank.html">Replace Code Name with Name & Color Text with blank</a>
+</div>
+<div class="main">
+  <h2>Custom Tag Replacer</h2>
+  <textarea id="input" rows="16" cols="80">
+    \\N[16]
+    \\N[17]
+
+    \\>\\i[64]\\}
+    \\>\\i[65]\\}
+
+    \\c[2]
+    \\c[7]
+    \\{\\<
+    \\c[0]
+    
+    \\>\\i[87]\\}
+    \\>\\i[88]\\}
+  </textarea><br><br>
+  <button onclick="pasteInput()">Paste</button>
+  <button onclick="replaceInTwoSteps()">Replace</button>
+  <button onclick="copyOutput()">Copy</button>
+  <h3>Result:</h3>
+  <textarea id="output" rows="16" cols="80"></textarea>
+</div>
+  <script>
+    function replaceInTwoSteps() {
+      const input = document.getElementById('input').value;
+
+      // Step 1 — Replace NPC tags
+      const npcMap = {
+        "16": "Ghoul", "17": "Ghoul", "19": "Skeleton",
+        "22": "Villager", "28": "Villager", "29": "Villager"
+      };
+
+      let replaced = input.replace(/\\\\N\[(16|17|19|22|28|29)\]/gm, (match, code) => {
+        return `${npcMap[code]}`;
+      });
+
+      // Step 2 — Replace Player tags
+      const playerMap = {
+        "64": "A", "65": "B", "66": "C", "67": "D", "68": "E",
+        "69": "F", "70": "G", "71": "H", "72": "I", "73": "J",
+        "74": "K", "75": "L", "76": "M", "77": "N", "78": "O",
+        "79": "Q", "80": "R", "81": "S", "82": "T", "83": "U",
+        "84": "V", "85": "W", "86": "X", "87": "Y", "88": "Z"
+      };
+
+
+
+      replaced = replaced.replace(/\\\\>\\\\i\[(64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88)\]\\\\\}/gm, (match, code) => {
+        return playerMap[code] || match;
+      });
+      // Step 3 — Replace Text Color tags
+      const textColor = {
+        "0": "",
+        "2": "",
+        "7": ""
+      };
+
+      replaced = replaced.replace(/\\\\c\[(0|2|7)\]/gm, (match, code) => {
+        return textColor[code] !== undefined ? textColor[code] : match;
+      });
+      // Step 4 — Replace The End Text tags
+      const endOfText = {
+        "{": "",
+      };
+      replaced = replaced.replace(/\\\\({)\\\\(<)/gm, (match, code) => {
+        return endOfText[code] !== undefined ? endOfText[code] : match;
+      });
+
+      document.getElementById('output').textContent = replaced;
+    }
+      // Paste button
+    async function pasteInput() {
+      try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('input').value = text;
+      } catch (err) {
+        alert("Paste failed: " + err);
+      }
+    }
+
+      // Copy button
+    function copyOutput() {
+      const outputText = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(outputText).then(() => {
+        alert("Copied to clipboard!");
+      }).catch(err => {
+        alert("Copy failed: " + err);
+      });
+    }
+  </script>
+</body>
+
+</html>

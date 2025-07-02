@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <title>Preserve Spaces Inside Brackets with Strings</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+    .sidebar {
+      height: 100vh;
+      width: 200px;
+      background-color: #333;
+      padding-top: 20px;
+      color: white;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 12px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #575757;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <a href="Find all parameters in 401 from 0-9.html">Find all parameters in 401 from 0-9</a>
+    <a href="Find all parameters in 401 from 0-9 with Multiple Files.html">Find all parameters in 401 from 0-9 with Multiple Files</a>
+    <a href="Remove Space in a JSON.html">Remove Space in a JSON</a>
+    <a href="Replace Code Name with Name & Color Text with blank.html">Replace Code Name with Name & Color Text with blank</a>
+</div>
+<div class="main">
+  <h2>Keep Spaces Inside [ ... ] if It Contains a String</h2>
+  <textarea id="input" rows="8" cols="80">["\\>\\i[87]\\}ELLOW MAGE\\{\\<"]
+["You took \\c[2]Henryk's head\\c[0] as a trophy!"]
+["\"It is a traditional wear for my kind.\""]
+[1,"\"I don't believe in magic.\""]
+remove this space please</textarea>
+  <br><br>
+  <button onclick="runCleaner()">Clean It!</button>
+  <h3>Result:</h3>
+  <textarea id="output"></textarea>
+</div>
+  <script>
+    function runCleaner() {
+      const input = document.getElementById('input').value;
+
+      // Match any [ ... ] that contains at least one quoted string
+      const regex = /\[\s*(?:(?:"(?:\\.|[^"\\])*")|[^"\[\]])*"(?:\\.|[^"\\])*"(?:[^"\[\]]*)\]/g;
+      const protectedSegments = [];
+      let temp = input;
+      let i = 0;
+
+      temp = temp.replace(regex, (match) => {
+        const key = `__PROTECTED_${i}__`;
+        protectedSegments.push({ key, value: match });
+        i++;
+        return key;
+      });
+
+      // Remove all whitespace globally
+      temp = temp.replace(/\s+/g, '');
+
+      // Restore protected segments
+      protectedSegments.forEach(({ key, value }) => {
+        temp = temp.replace(key, value);
+      });
+
+      document.getElementById('output').textContent = temp;
+    }
+  </script>
+</body>
+</html>

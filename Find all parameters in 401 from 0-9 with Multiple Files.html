@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Batch JSON Formatter & Zipper</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+    }
+    .sidebar {
+      height: 100vh;
+      width: 200px;
+      background-color: #333;
+      padding-top: 20px;
+      color: white;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 12px;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #575757;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <a href="Find all parameters in 401 from 0-9.html">Find all parameters in 401 from 0-9</a>
+    <a href="Find all parameters in 401 from 0-9 with Multiple Files.html">Find all parameters in 401 from 0-9 with Multiple Files</a>
+    <a href="Remove Space in a JSON.html">Remove Space in a JSON</a>
+    <a href="Replace Code Name with Name & Color Text with blank.html">Replace Code Name with Name & Color Text with blank</a>
+</div>
+<div class="main">
+  <h2>Upload JSON Files → Format → ZIP Download</h2>
+  <input type="file" id="inputFiles" multiple accept=".json" />
+  <br />
+  <button onclick="processFilesToZip()">Format & Download ZIP</button>
+  <pre id="log"></pre>
+</div>
+  <script>
+    async function processFilesToZip() {
+      const files = document.getElementById("inputFiles").files;
+      const log = document.getElementById("log");
+      const zip = new JSZip();
+      log.textContent = "";
+
+      for (const file of files) {
+        const content = await file.text();
+        const formatted = formatJSON(content);
+        zip.file("formatted_" + file.name, formatted);
+        log.textContent += `✅ Processed: ${file.name}\n`;
+      }
+
+      zip.generateAsync({ type: "blob" }).then(function(content) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "formatted_json_files.zip";
+        link.click();
+      });
+    }
+
+    function formatJSON(input) {
+      const pattern = /({\s*"code"\s*:\s*401\s*,\s*"indent"\s*:\s*[0-9]{1,2}\s*,\s*"parameters"\s*:\s*)\[(.*?)\](\s*})/gs;
+
+      return input.replace(pattern, (_, start, content, end) => {
+        let items = [];
+        let current = '';
+        let inString = false;
+        let escape = false;
+
+        for (let i = 0; i < content.length; i++) {
+          const char = content[i];
+
+          if (char === '\\' && !escape) {
+            escape = true;
+            current += char;
+            continue;
+          }
+
+          if (char === '"' && !escape) inString = !inString;
+          escape = false;
+
+          if (char === ',' && !inString) {
+            items.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        if (current.trim()) items.push(current.trim());
+
+        const multiline = items
+          .map(item => item.match(/^".*"$/) || item.match(/^".+\\.+"/) ? `\n${item}` : item)
+          .join(',');
+
+        return `${start}[${multiline}\n]${end}`;
+      });
+    }
+  </script>
+</body>
+</html>
