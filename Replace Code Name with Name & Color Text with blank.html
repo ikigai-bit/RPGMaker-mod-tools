@@ -93,11 +93,18 @@
       // Step 3 — Replace Text Color tags
       const textColor = {
         "0": "",
+        "1": "",
         "2": "",
-        "7": ""
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": "",
+        "7": "",
+        "8": "",
+        "9": ""
       };
 
-      replaced = replaced.replace(/\\\\c\[(0|2|7)\]/gm, (match, code) => {
+      replaced = replaced.replace(/\\\\c\[(0|1|2|3|4|5|6|7|8|9)\]/gm, (match, code) => {
         return textColor[code] !== undefined ? textColor[code] : match;
       });
       // Step 4 — Replace The End Text tags
@@ -105,6 +112,14 @@
         "{": "",
       };
       replaced = replaced.replace(/\\\\({)\\\\(<)/gm, (match, code) => {
+        return endOfText[code] !== undefined ? endOfText[code] : match;
+      });
+
+      replaced = replaced.replace(/\\\\({)/gm, (match, code) => {
+        return endOfText[code] !== undefined ? endOfText[code] : match;
+      });
+
+      replaced = replaced.replace(/\\\\(})(<)/gm, (match, code) => {
         return endOfText[code] !== undefined ? endOfText[code] : match;
       });
 
